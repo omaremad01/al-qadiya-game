@@ -39,11 +39,7 @@ uvicorn backend.main:app --reload
 
 اختبار من غير مفتاح ولا إنترنت (بردود مزيفة): `python -m tests.smoke_test`
 
-## النشر المجاني
 
-**Hugging Face Spaces (الأسهل):** New Space ← SDK: Docker ← Blank ← ارفع الملفات ← Settings ← Variables and secrets ← أضف Secrets: `GROQ_API_KEY` و`CASE_SECRET`.
-
-**Render:** Web Service ← Build: `pip install -r requirements.txt` ← Start: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT` ← أضف نفس الـ env vars.
 
 ## إزاي بتشتغل بشكل صحيح
 

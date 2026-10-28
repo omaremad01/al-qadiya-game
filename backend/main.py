@@ -28,8 +28,6 @@ ROOT = Path(__file__).resolve().parent.parent
 app = FastAPI(title="القضية")
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 
-# القضية بتتشفّر وتتبعت للمتصفح، فالسيرفر ما بيحتفظش بأي حالة للاعبين
-# واللاعب مايقدرش يشوف القاتل. ده بيخلّي اللعبة تشتغل صح حتى لو السيرفر عمل restart.
 _fernet = Fernet(base64.urlsafe_b64encode(hashlib.sha256(CASE_SECRET.encode()).digest()))
 
 

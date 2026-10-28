@@ -14,7 +14,6 @@ _avail_cache = {"t": 0, "ids": None}
 
 # نماذج مش للمحادثة، بنتجاهلها
 SKIP = ("whisper", "tts", "guard", "orpheus", "embed", "compound", "safeguard")
-# ترتيب تفضيلنا لو كانت متاحة (بعد النماذج اللي في .env)
 PREFERRED = ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-20b",
              "llama-3.1-8b-instant", "qwen/qwen3.6-27b", "qwen/qwen3.8-27b"]
 
@@ -62,7 +61,7 @@ def model_order(requested=None):
 
 
 def _clean(text: str) -> str:
-    # بعض نماذج الـ reasoning بتطلّع <think>...</think> قبل الرد
+   
     return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
 
 
@@ -73,7 +72,7 @@ def chat(messages, *, temperature=0.7, max_tokens=700, json_mode=False, models=N
         for attempt in range(2):
             try:
                 kwargs = dict(model=model, messages=messages, temperature=temperature,
-                              # نماذج الـ reasoning بتصرف tokens في التفكير، فبنوسّع الحد
+                             
                               max_tokens=min(max_tokens * 3 + 1000, 8000) if reasoning else max_tokens)
                 if json_mode:
                     kwargs["response_format"] = {"type": "json_object"}
