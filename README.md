@@ -1,16 +1,11 @@
----
-title: القضية
-emoji: 🕵️
-colorFrom: yellow
-colorTo: gray
-sdk: docker
-app_port: 7860
-pinned: false
----
-
-# 🕵️ القضية — لعبة تحقيق يومية بالـ AI Agents
+# 🕵️ القضية: لعبة تحقيق يومية بالـ AI Agents
 
 جريمة جديدة كل يوم. 4-5 مشتبه فيهم، واحد بس هو القاتل. تستجوبهم بكلامك الحر، تفتّش مسرح الجريمة، تبعت الأدلة للمعمل الجنائي، وفي الآخر تتهم واحد والقاضي يقيّمك وتناقشه.
+
+> 💸 **بدون أي تكلفة:** كل اللي محتاجه مفتاح [Groq](https://console.groq.com/keys) مجاني، وتشغّلها على جهازك في دقيقتين.
+
+<!-- ضيف هنا لقطة شاشة أو GIF للعبة وهي شغالة -->
+<!-- ![لقطة من اللعبة](docs/demo.gif) -->
 
 ## الـ Agents
 
@@ -25,26 +20,62 @@ pinned: false
 ## التشغيل على جهازك
 
 1. خد مفتاح مجاني من https://console.groq.com/keys
-2. نفّذ الأوامر دي (أي جهاز ضعيف يكفي، لأن الـ AI شغال على Groq):
+2. نزّل المشروع وجهّز البيئة:
 
 ```bash
+git clone https://github.com/omaremad01/al-qadiya-game.git
+cd al-qadiya-game
+
 python -m venv .venv
 source .venv/bin/activate        # على ويندوز: .venv\Scripts\activate
 pip install -r requirements.txt
+
 cp .env.example .env             # على ويندوز: copy .env.example .env
+```
+
+3. ولّد مفتاح التشفير:
+
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+4. افتح ملف `.env` وحط:
+   - `GROQ_API_KEY`: مفتاح Groq بتاعك
+   - `CASE_SECRET`: مفتاح التشفير اللي ولّدته فوق
+
+5. شغّل السيرفر:
+
+```bash
 uvicorn backend.main:app --reload
 ```
 
-3. افتح ملف `.env` وحط `GROQ_API_KEY` و`CASE_SECRET`، وافتح http://localhost:8000
+وافتح http://localhost:8000
 
-اختبار من غير مفتاح ولا إنترنت (بردود مزيفة): `python -m tests.smoke_test`
+### أو بـ Docker
 
+```bash
+docker build -t al-qadiya .
+docker run -p 7860:7860 --env-file .env al-qadiya
+```
 
+وافتح http://localhost:7860
+
+### اختبار من غير مفتاح ولا إنترنت
+
+بردود مزيفة، للتأكد إن الكود شغال:
+
+```bash
+python -m tests.smoke_test
+```
 
 ## إزاي بتشتغل بشكل صحيح
 
 - **القاتل مش بيوصل للمتصفح أبدًا.** القضية كاملة بتتشفّر (Fernet) وبتروح للمتصفح كـ token مبهم، وبيرجّعه مع كل طلب. السيرفر مش محتاج database ولا sessions.
+- **Information asymmetry:** كل agent بياخد الجزء اللي يخصه من الحقيقة بس. البريء مش بيعرف مين القاتل، فمش هيسرّب حاجة بالغلط.
+- **القاتل بيتختار بالكود مش بالـ LLM**، لأن النماذج بتميل تختار نفس الشخص كل مرة.
+- **Structured outputs + validation:** أي قضية بتتراجع قبل ما توصل للاعب (فيه قاتل؟ فيه دليل حاسم؟ كل دليل له مكان؟).
 - **قضية اليوم** بتتولّد مرة واحدة وبتتخزّن في `data/`، وكل اللاعبين بياخدوا نفس القضية (بتوقيت القاهرة).
+- **Guardrails:** فلتر بيمنع المعمل من ذكر أسماء، وحماية من prompt injection في كلام اللاعب.
 - **حدود Groq المجانية:** بيكتشف النماذج المتاحة لحسابك تلقائيًا وبيتحوّل للنموذج الاحتياطي لو الأساسي وصل للحد. وفي rate limit لكل زائر لحماية المفتاح.
 - لو اللاعبين زادوا، قلّل `RATE_LIMIT_NEW_CASES_PER_HOUR` لأن توليد قضية هو أغلى عملية.
 
@@ -54,6 +85,14 @@ uvicorn backend.main:app --reload
 - **المكافآت:** XP ومستويات (كل مستويين = تحليل زيادة في كل قضية)، عملات 🪙 تصرفها على تحاليل وتلميحات، شارات، وسلسلة أيام متتالية للقضية اليومية.
 - الملف الشخصي محفوظ في المتصفح (localStorage).
 
+## التقنيات المستخدمة
+
+Python · FastAPI · Groq API (Llama 3.3 70B مع fallback تلقائي) · Vanilla JS بواجهة عربي RTL · Fernet
+
 ## تطوير لاحقًا
 
-ليدربورد يومي (SQLite) · قضايا بمواضيع مختارة · صوت للمشتبه فيهم · وضع تحدي مع صاحبك بنفس القضية.
+- ليدربورد يومي (SQLite)
+- قضايا بمواضيع مختارة
+- صوت للمشتبه فيهم
+- وضع تحدي مع صاحبك بنفس القضية
+
